@@ -31,12 +31,7 @@ void q_free(Tree *query){
 void q_print(Tree *data){
     if(data == NULL) return;
     int space = 0;
-    
-    //if (strcmp(data->data, "&&") == 0);
-    //else if(strcmp(data->data, "||") == 0);
-        
- 
-        t_print(data, space, f);
+    t_print(data, space, f);
 }
 
 
@@ -62,18 +57,17 @@ int q_get_col_index(void *query_data){
 
 
 double q_get_double(void *query_data){
-    
-    //TODO: Write this
-    
-    return 0.0;
+    int* err = malloc(sizeof(int));
+    double r = rd_parse_number(query_data, 0, strlen(query_data), err);
+    free(err);
+    return r;
 }
 
 
 char *q_get_str(void *query_data){
     
-    //TODO: Write this
     
-    return NULL;
+    return (char*)query_data;
 }
 
 void print_data(void* v){

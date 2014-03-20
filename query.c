@@ -9,8 +9,6 @@
 #include "q_defs.h"
 #include "defs_itf.h"
 void print_data();
-void print_str();
-void print_con();
 void(*f)(void*) = print_data;
 
 
@@ -22,8 +20,11 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
 
 
 void q_free(Tree *query){
-    
-    //TODO: write this
+    if(query->left != NULL)
+    q_free(query->left);
+    if(query->right != NULL)
+    q_free(query->right);
+    free(query);
 }
 
 

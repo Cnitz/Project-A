@@ -8,10 +8,10 @@
 
 #include "q_defs.h"
 #include "defs_itf.h"
-void print_num();
+void print_data();
 void print_str();
-void(*p)(void*) = print_str;
-void(*f)(void*) = print_num;
+void print_con();
+void(*f)(void*) = print_data;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
@@ -23,21 +23,19 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
 
 void q_free(Tree *query){
     
-    
+    //TODO: write this
 }
 
 
 void q_print(Tree *data){
     if(data == NULL) return;
     int space = 0;
-    int* err = malloc(sizeof(int));
-    rd_parse_number(data->data, 0, strlen(data->data), err);
-    if(*err == 1)
-        t_print(data, space, p);
-    else if(*err == 0){
+    
+    //if (strcmp(data->data, "&&") == 0);
+    //else if(strcmp(data->data, "||") == 0);
+        
+ 
         t_print(data, space, f);
-    }
-    free(err);
 }
 
 
@@ -77,14 +75,17 @@ char *q_get_str(void *query_data){
     return NULL;
 }
 
-void print_num(void* v){
+void print_data(void* v){
     if(v == NULL) return;
     int* err = calloc(1, sizeof(int));
+    rd_parse_number(v, 0, strlen(v), err);
+    if(*err == 0)
     printf("%.2f\n", rd_parse_number(v, 0, strlen(v), err));
+    else if (*err == 1){
+        if (strcmp(v, "&&") == 0) printf("AND\n");
+        else if(strcmp(v, "||") == 0) printf("OR\n");
+        else printf("%s\n",  v);
+    }
     free(err);
 }
 
-void print_str(void* v){
-    if (v == NULL) return;
-    printf("%s\n",  v);
-}

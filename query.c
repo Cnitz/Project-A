@@ -9,21 +9,40 @@
 #include "q_defs.h"
 #include "defs_itf.h"
 void print_data();
+int num_cons();
 void(*f)(void*) = print_data;
+void testing();
+int find_space();
+int find_conn();
+void build_tree();
+char* str_at();
+char **columns;
+int cc;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
-    //TODO: Write this
+    int conc = 0;
+    columns = malloc(sizeof(char*)*num_columns);
+    columns = column_names;
+    cc = num_columns;
     
+    
+    conc = num_cons(query_text);
+    find_conn(query_text, conc/2);
+    
+    
+
     return NULL;
 }
 
 
 void q_free(Tree *query){
-    if(query->left != NULL)
-    q_free(query->left);
-    if(query->right != NULL)
-    q_free(query->right);
+    if(t_left(query) != NULL)
+    q_free(t_left(query));
+    if(t_right(query) != NULL)
+    q_free(t_right(query));
+    
+    if(query != NULL)
     free(query);
 }
 
@@ -64,11 +83,7 @@ double q_get_double(void *query_data){
 }
 
 
-char *q_get_str(void *query_data){
-    
-    
-    return (char*)query_data;
-}
+char *q_get_str(void *query_data){ return (char*)query_data; }
 
 void print_data(void* v){
     if(v == NULL) return;
@@ -84,3 +99,87 @@ void print_data(void* v){
     free(err);
 }
 
+int num_cons(char* text){
+    int count = 0;
+    for(int i = 0; i < strlen(text); i++){
+        if(*(text+i) == '&')
+            if(*(text+i+1) == '&') count++;
+        if(*(text+i) == '|')
+            if(*(text+i+1) == '|') count++;
+    }
+    return count;
+}
+
+int find_space(char* p, int start){
+    for(int i = start; i < strlen(p); i++){
+        if( p[i] == ' ')
+            if( p[i+1] != ' ')
+                return i;
+    }
+    return 0;
+}
+
+// returns index of the connective
+int find_conn(char* p, int n){
+    int index = 0, cc = 0;
+    for(int i = 0; i < strlen(p); i++){
+        if(cc == n) return index;
+        if(p[i] == '&' && p[i+1] == '&'){
+            index = i;
+            cc++;
+        }
+        if(p[i] == '|' && p[i+1] == '|'){
+            index = i;
+            cc++;
+        }
+        
+    }
+    return 0;
+}
+
+//TODO: change to return a tree
+
+void build_tree(char* query){
+    int conc = num_cons(query);
+    int loc_conn = find_conn(query, conc/2);
+    Tree* t = t_make();
+    if(query[loc_conn] == '&'){
+        t_set_data(t, "&&");
+    }
+    if(query[loc_conn] == '|'){
+        t_set_data(t, "||");
+    }
+    //left subtree
+    char* left = calloc(loc_conn, sizeof(char));
+    strncpy(left, query, loc_conn-1);
+    left[loc_conn] = '\0';
+   
+    //right subtree
+    char* right = malloc(sizeof(char)*(strlen(query)/2)+1);
+    strcpy(right, query+loc_conn+2);
+    
+    free(left);
+    free(right);
+}
+
+char* str_at(char* p, int n){
+    int end = 0, in = 0;
+    for(int i = n; i < strlen(p); i++){
+        if(p[i] != ' ')
+            in = 1;
+        if(p[i] == ' ' && in == 1){
+            end = i;
+            break;
+        }
+    }
+    char* ret = malloc(sizeof(char)*(end-n+1));
+    strncpy(ret, p+n, end-n);
+    p[end-n+1] = '\0';
+    return ret;
+}
+
+void testing(){
+    for(int i = 0; i < cc; i++){
+     printf("%s\n", columns[i]);
+    }
+}

@@ -142,14 +142,14 @@ int find_conn(char* p, int n){
 Tree* build_tree(char* query){
     int conc = num_cons(query);
     int loc_conn = 0;
-    if(conc%2 == 0)
-        loc_conn = find_conn(query, conc/2);
-    if(conc%2 != 0)
+    
         loc_conn = find_conn(query, conc/2+1);
     Tree* t = t_make();
     
     if(conc == 0) {
+       
         t_set_data(t, str_at(query, 0));
+
     }
     if(query[loc_conn] == '&'){
         t_set_data(t, "&&");
@@ -165,12 +165,11 @@ Tree* build_tree(char* query){
     left[loc_conn] = '\0';
         
     //right subtree
-    char* right = malloc(sizeof(char)*(strlen(query)/2)+1);
-    strcpy(right, query+loc_conn+2); //not printing
+    char* right = calloc(((strlen(query)/2)+1),sizeof(char));
+    strcpy(right, query+loc_conn+2);
         
-        printf("~%s~\n", left);
         t_set_left(t, build_tree(left));
-        t_set_right(t,build_tree(right));
+        t_set_right(t, build_tree(right));
         
   
         
@@ -183,13 +182,21 @@ Tree* build_tree(char* query){
 char* str_at(char* p, int n){
     int end = 0, in = 0;
     for(int i = n; i < strlen(p); i++){
-        if(p[i] != ' ')
+        if(in == 0 && p[i] != ' ') n = i;
+        if(p[i] != ' '){
             in = 1;
-        if(p[i] == ' '&& in == 1){
+        }
+ 
+        if(p[i] == ' ' && in == 1){
             end = i;
             break;
         }
-        if(p[i] == '\0') break;
+         end = (i+1);
+        if(p[i] == '\0') {
+            
+            break;
+        }
+       
     }
     char* ret = malloc(sizeof(char)*(end-n+1));
     strncpy(ret, p+n, end-n);

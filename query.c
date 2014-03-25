@@ -17,6 +17,7 @@ int find_conn();
 Tree* build_tree();
 char* str_at();
 char **columns;
+char* types;
 int cc;
 
 
@@ -25,14 +26,13 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
     columns = malloc(sizeof(char*)*num_columns);
     columns = column_names;
     cc = num_columns;
+    types = column_types;
     
-    
-    conc = num_cons(query_text);
-    find_conn(query_text, conc/2);
-    
+    Tree* ret = build_tree(query_text);
+    //TODO: insert build_tree
     
 
-    return NULL;
+    return ret;
 }
 
 
@@ -68,10 +68,11 @@ int q_get_type(void *query_data){
 
 
 int q_get_col_index(void *query_data){
-    
-    //TODO: Write this
-    
-    return 0;
+    for(int i = 0; i < cc; i++){
+    if(strcmp(query_data, columns[i]) == 0)
+        return i;
+    }
+    return -1;
 }
 
 
@@ -137,7 +138,7 @@ int find_conn(char* p, int n){
     return 0;
 }
 
-//TODO: change to return a tree
+
 
 Tree* build_tree(char* query){
     int conc = num_cons(query);

@@ -154,6 +154,8 @@ int find_conn(char* p, int n){
 
 
 Tree* build_tree(char* query){
+    static int space = -1;
+    space++;
     int conc = num_cons(query);
     int loc_conn = 0;
     
@@ -171,21 +173,21 @@ Tree* build_tree(char* query){
     }
     if(conc != 0){
         
-        //left subtree
-        char* left = calloc(loc_conn, sizeof(char));
+       
+        char left[loc_conn];
         strncpy(left, query, loc_conn);
         left[loc_conn] = '\0';
         
-        //right subtree
+      
         char* right = calloc(((strlen(query)/2)+1),sizeof(char));
         strcpy(right, query+loc_conn+2);
-        
+
         t_set_left(t, build_tree(left));
         t_set_right(t, build_tree(right));
         
         
         
-        free(left);
+        
         free(right);
     }
     return t;

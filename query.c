@@ -20,8 +20,8 @@ Tree* build_tree();
 void str_at();
 char **columns;
 char* types;
-char* query_trimmed;
 int cc;
+char* qt;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
@@ -166,8 +166,8 @@ Tree* build_tree(char* query){
     Tree* t = t_make();
     
     if(conc == 0) {
-        str_at(query, 0);
-        t_set_data(t, query_trimmed);
+       str_at(query, 0);
+        t_set_data(t, qt);
 
     }
     if(query[loc_conn] == '&'){
@@ -220,8 +220,10 @@ void str_at(char* p, int n){
     char* ret = malloc(sizeof(char)*(end-n+1));
     strncpy(ret, p+n, end-n);
     ret[end-n] = '\0';
-    query_trimmed = ret;
-    //return ret;
+    qt = malloc(sizeof(char)*(end-n+1));
+    strcpy(qt, ret);
+    free(ret);
+   // return ret;
 }
 
 int grammar_checker(char* text){

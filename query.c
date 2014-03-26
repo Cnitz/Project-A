@@ -17,11 +17,10 @@ int find_conn();
 int grammar_checker();
 int find_conditional();
 Tree* build_tree();
-void str_at();
+char* str_at();
 char **columns;
 char* types;
 int cc;
-char* qt;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
@@ -41,11 +40,13 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
 
 //TODO: make this work
 void q_free(Tree *query){
+
     if(t_left(query) != NULL)
         q_free(t_left(query));
     if(t_right(query) != NULL)
         q_free(t_right(query));
-    
+    if(query->data != NULL)
+        free(query->data);
     if(query != NULL){
         
         free(query);
@@ -166,8 +167,8 @@ Tree* build_tree(char* query){
     Tree* t = t_make();
     
     if(conc == 0) {
-       str_at(query, 0);
-        t_set_data(t, qt);
+        char* hold = str_at(query, 0);
+        t_set_data(t, hold);
 
     }
     if(query[loc_conn] == '&'){
@@ -198,7 +199,7 @@ Tree* build_tree(char* query){
     return t;
 }
 
-void str_at(char* p, int n){
+char* str_at(char* p, int n){
     int end = 0, in = 0;
     for(int i = n; i < strlen(p); i++){
         if(in == 0 && p[i] != ' ') n = i;
@@ -220,10 +221,7 @@ void str_at(char* p, int n){
     char* ret = malloc(sizeof(char)*(end-n+1));
     strncpy(ret, p+n, end-n);
     ret[end-n] = '\0';
-    qt = malloc(sizeof(char)*(end-n+1));
-    strcpy(qt, ret);
-    free(ret);
-   // return ret;
+    return ret;
 }
 
 int grammar_checker(char* text){

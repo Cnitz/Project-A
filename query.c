@@ -163,7 +163,9 @@ Tree* build_tree(char* query){
     Tree* t = t_make();
     
     if(conc == 0) {
-        t_set_data(t, str_at(query, 0));
+        char* hold = str_at(query, 0);
+        t_set_data(t, hold);
+
     }
     if(query[loc_conn] == '&'){
         t_set_data(t, "&&");

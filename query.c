@@ -15,6 +15,7 @@ void testing();
 int find_space();
 int find_conn();
 int grammar_checker();
+int find_conditional();
 Tree* build_tree();
 char* str_at();
 char **columns;
@@ -23,14 +24,13 @@ int cc;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
-
+    if(grammar_checker(query_text) == 0) return NULL;
     columns = malloc(sizeof(char*)*num_columns);
     columns = column_names;
     cc = num_columns;
     types = column_types;
     
     Tree* ret = build_tree(query_text);
-    //TODO: insert build_tree
     
 
     return ret;
@@ -79,13 +79,15 @@ int q_get_col_index(void *query_data){
 
 double q_get_double(void *query_data){
     int* err = malloc(sizeof(int));
-    double r = rd_parse_number(query_data, 0, strlen(query_data), err);
+    double r = rd_parse_number((char*)query_data, find_conditional(query_data), strlen(query_data), err);
     free(err);
     return r;
 }
 
 
-char *q_get_str(void *query_data){ return (char*)query_data; }
+char *q_get_str(void *query_data){
+    return rd_parse_string((char*)query_data, find_conditional(query_data), strlen(query_data));
+}
 
 void print_data(void* v){
     if(v == NULL) return;
@@ -214,6 +216,9 @@ int grammar_checker(char* text){
                 in = 1;
         if(text[i] == '<' || text[i] == '=' || text[i] == '>'){
             con++;
+            if(text[i] == '=' && text[i+1] == '=') return 0;
+            if(text[i] == '>' && text[i+1] != '=') return 0;
+            if(text[i] == '<' && text[i+1] != '=') return 0;
             if(con > 2) return 0;
             
         }
@@ -259,6 +264,14 @@ int grammar_checker(char* text){
     }
  
     return 1;
+}
+
+int find_conditional(char* text){
+    for(int i = 0; i < strlen(text); i++){
+        if(text[i]  == '=') return i+1;
+    }
+    return -1;
+
 }
 
 void testing(){

@@ -205,26 +205,59 @@ char* str_at(char* p, int n){
 }
 
 int grammar_checker(char* text){
-    int in = 0, con = 0, in2 = 0
+    int in = 0, con = 0, in2 = 0, cc = 0;
     //checks conditional statements.
     for(int i = 0; i < strlen(text); i++){
         if(text[i] == ' ') {}
-        if((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z')) in = 1;
-        if(text[i] == '<' || text[i] == '=' ||text[i] == '>')
-            con = 1;
-        if(in == 1 && con == 1)
-            if ((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z'))
+        if((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z'))
+            if(con == 0)
+                in = 1;
+        if(text[i] == '<' || text[i] == '=' || text[i] == '>'){
+            con++;
+            if(con > 2) return 0;
+            
+        }
+        if(in == 1 && con > 0)
+            if ((text[i] != ' ' && text[i] != '&') && (text[i] != '|' && text[i] != '=')
+                && (text[i] != '>' && text[i] != '<'))
                 in2 = 1;
-        if (text[i] == ' ' && in == 1 && in2 == 1 && con == 1){
+        if (text[i] == ' ' && in == 1 && in2 == 1 && con > 0){
             in = 0;
             in2 = 0;
             con = 0;
+            cc = 0;
             continue;
         }
-       else if (text[i] == ' ' && (in == 1 || in2 == 1 || con == 1))
+        else if (text[i] == ' ' && (in == 1 || in2 == 1 || con > 0))
             return 0;
+
+        if (text[i] == '&' && in == 1 && in2 == 1 && con >  0){
+            in = 0;
+            in2 = 0;
+            con = 0;
+            cc = 0;
+                    }
+        
+        if (text[i] == '|' && in == 1 && in2 == 1 && con > 0){
+            in = 0;
+            in2 = 0;
+            con = 0;
+            cc = 0;
+           
+        }
+       
+        if((text[i] == '&' && text[i+1] == '&') || (text[i] == '|' && text[i+1] == '|')) cc++;
+        if((text[i] == '&' && text[i+1] != '&') || (text[i] == '|' && text[i+1] != '|')){
+            cc++;
+            if(cc == 2) continue;
+                return 0;
+            }
+        
+        
+        
+        
     }
-  //  if(in == 0) printf("not letter\n");
+ 
     return 1;
 }
 

@@ -7,13 +7,14 @@
 //
 
 #include "q_defs.h"
-#include "defs_itf.h"
+
 void print_data();
 int num_cons();
 void(*f)(void*) = print_data;
 void testing();
 int find_space();
 int find_conn();
+int grammar_checker();
 Tree* build_tree();
 char* str_at();
 char **columns;
@@ -22,7 +23,7 @@ int cc;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
-    int conc = 0;
+
     columns = malloc(sizeof(char*)*num_columns);
     columns = column_names;
     cc = num_columns;
@@ -95,7 +96,7 @@ void print_data(void* v){
     else if (*err == 1){
         if (strcmp(v, "&&") == 0) printf("AND\n");
         else if(strcmp(v, "||") == 0) printf("OR\n");
-        else printf("%s\n",  v);
+        else printf("%s\n",  (char *)v);
     }
     free(err);
 }
@@ -148,9 +149,7 @@ Tree* build_tree(char* query){
     Tree* t = t_make();
     
     if(conc == 0) {
-       
         t_set_data(t, str_at(query, 0));
-
     }
     if(query[loc_conn] == '&'){
         t_set_data(t, "&&");
@@ -203,6 +202,30 @@ char* str_at(char* p, int n){
     strncpy(ret, p+n, end-n);
     ret[end-n] = '\0';
     return ret;
+}
+
+int grammar_checker(char* text){
+    int in = 0, con = 0, in2 = 0
+    //checks conditional statements.
+    for(int i = 0; i < strlen(text); i++){
+        if(text[i] == ' ') {}
+        if((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z')) in = 1;
+        if(text[i] == '<' || text[i] == '=' ||text[i] == '>')
+            con = 1;
+        if(in == 1 && con == 1)
+            if ((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z'))
+                in2 = 1;
+        if (text[i] == ' ' && in == 1 && in2 == 1 && con == 1){
+            in = 0;
+            in2 = 0;
+            con = 0;
+            continue;
+        }
+       else if (text[i] == ' ' && (in == 1 || in2 == 1 || con == 1))
+            return 0;
+    }
+  //  if(in == 0) printf("not letter\n");
+    return 1;
 }
 
 void testing(){

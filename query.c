@@ -24,7 +24,9 @@ int cc;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
-    if(grammar_checker(query_text) == 0) return NULL;
+    if(grammar_checker(query_text) == 0) {printf("here\n");
+        return NULL;}
+    
     columns = malloc(sizeof(char*)*num_columns);
     columns = column_names;
     cc = num_columns;
@@ -54,7 +56,7 @@ void q_print(Tree *data){
     t_print(data, space, f);
 }
 
-
+//TODO: FIX
 int q_get_type(void *query_data){
     
     if(strcmp("||", query_data) == 0) return 0;
@@ -89,12 +91,20 @@ char *q_get_str(void *query_data){
     return rd_parse_string((char*)query_data, find_conditional(query_data), strlen(query_data));
 }
 
+//TODO: MAKE DOUBLES PRINT "%.2f"
 void print_data(void* v){
     if(v == NULL) return;
     int* err = calloc(1, sizeof(int));
-    rd_parse_number(v, 0, strlen(v), err);
-    if(*err == 0)
-        printf("%.2f\n", rd_parse_number(v, 0, strlen(v), err));
+    int n = find_conditional((char*)v);
+    
+    //if(((char*)v)[n] > '0' && ((char*)v)[n] < '9')
+        
+    rd_parse_number(v, n, strlen(v), err);
+    if(*err == 0){
+        char* p = malloc(sizeof(char)*n);
+        printf("%s", strncpy(p, v, n));
+        printf("%.2f\n", rd_parse_number(v, n, strlen(v), err));
+    }
     else if (*err == 1){
         if (strcmp(v, "&&") == 0) printf("AND\n");
         else if(strcmp(v, "||") == 0) printf("OR\n");
@@ -217,8 +227,8 @@ int grammar_checker(char* text){
         if(text[i] == '<' || text[i] == '=' || text[i] == '>'){
             con++;
             if(text[i] == '=' && text[i+1] == '=') return 0;
-            if(text[i] == '>' && text[i+1] != '=') return 0;
-            if(text[i] == '<' && text[i+1] != '=') return 0;
+            if(text[i] == '>' && (text[i+1] == '<' || text[i+1] == '>' || text[i+1] == '&' || text[i+1] == '|')) return 0;
+            if(text[i] == '<' && (text[i+1] == '<' || text[i+1] == '>' || text[i+1] == '&' || text[i+1] == '|')) return 0;
             if(con > 2) return 0;
             
         }
@@ -265,10 +275,12 @@ int grammar_checker(char* text){
     
     return 1;
 }
-
+//returns index after conditional
 int find_conditional(char* text){
     for(int i = 0; i < strlen(text); i++){
-        if(text[i]  == '=') return i+1;
+        if(text[i] == '=') return i+1;
+        if(text[i] == '<' && text[i+1] != '=') return i+1;
+        if(text[i] == '>' && text[i+1] != '=') return i+1;
     }
     return -1;
     

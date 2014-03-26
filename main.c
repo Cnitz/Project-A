@@ -51,12 +51,12 @@ int main(){
     
     printf( "%d\n", find_conn("AMOUNT>=5000     && OPERATION=500 && || && ||", 3));
    // build_tree("AMOUNT>=5000     && OPERATION=500 && || && ||"); */
-    //Tree* t2 = q_parse("AMOUNT>=50000 && ZIP=47906 && OCCUPATION=Prof || AMOUNT>100 && OCCUPATION=TA && tom=89 || georgia=fish", columns2, sc, 3);
- //   q_print(t2);
-    //printf("%d\n",grammar_checker("    AMOUNT>=tom      &&     tom>you&&herny=kkk   "));
+    Tree* t2 = q_parse("AMOUNT>=50000.8989 && ZIP=47906 && OCCUPATION=Prof || AMOUNT>100 && OCCUPATION=TA && tom=89 || georgia=fish", columns2, sc, 3);
+    q_print(t2);
+   // printf("%d\n",grammar_checker("AMOUNT>=50000 && ZIP=47906 && OCCUPATION=Prof || AMOUNT>100 && OCCUPATION=TA && tom=89 || georgia=fish"));
     //q_get_double("tom>=you");
-    printf("%.2f\n", q_get_double("AMOUNT>=5000"));
-    printf("%s\n", q_get_str("Amount>=tom"));
+   // printf("%.2f\n", q_get_double("AMOUNT>=5000"));
+   // printf("%s\n", q_get_str("Amount>=tom"));
     /*
      OR
       AND

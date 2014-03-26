@@ -1,6 +1,6 @@
 //
 //  query.c
-//  
+//
 //
 //  Created by Christian Nitz on 3/19/14.
 //
@@ -32,19 +32,19 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
     
     Tree* ret = build_tree(query_text);
     
-
+    
     return ret;
 }
 
-
+//TODO: make this work
 void q_free(Tree *query){
     if(t_left(query) != NULL)
-    q_free(t_left(query));
+        q_free(t_left(query));
     if(t_right(query) != NULL)
-    q_free(t_right(query));
+        q_free(t_right(query));
     
     if(query != NULL)
-    free(query);
+        free(query);
 }
 
 
@@ -70,8 +70,8 @@ int q_get_type(void *query_data){
 
 int q_get_col_index(void *query_data){
     for(int i = 0; i < cc; i++){
-    if(strcmp(query_data, columns[i]) == 0)
-        return i;
+        if(strcmp(query_data, columns[i]) == 0)
+            return i;
     }
     return -1;
 }
@@ -94,7 +94,7 @@ void print_data(void* v){
     int* err = calloc(1, sizeof(int));
     rd_parse_number(v, 0, strlen(v), err);
     if(*err == 0)
-    printf("%.2f\n", rd_parse_number(v, 0, strlen(v), err));
+        printf("%.2f\n", rd_parse_number(v, 0, strlen(v), err));
     else if (*err == 1){
         if (strcmp(v, "&&") == 0) printf("AND\n");
         else if(strcmp(v, "||") == 0) printf("OR\n");
@@ -147,7 +147,7 @@ Tree* build_tree(char* query){
     int conc = num_cons(query);
     int loc_conn = 0;
     
-        loc_conn = find_conn(query, conc/2+1);
+    loc_conn = find_conn(query, conc/2+1);
     Tree* t = t_make();
     
     if(conc == 0) {
@@ -161,22 +161,22 @@ Tree* build_tree(char* query){
     }
     if(conc != 0){
         
-    //left subtree
-    char* left = calloc(loc_conn, sizeof(char));
-    strncpy(left, query, loc_conn);
-    left[loc_conn] = '\0';
+        //left subtree
+        char* left = calloc(loc_conn, sizeof(char));
+        strncpy(left, query, loc_conn);
+        left[loc_conn] = '\0';
         
-    //right subtree
-    char* right = calloc(((strlen(query)/2)+1),sizeof(char));
-    strcpy(right, query+loc_conn+2);
+        //right subtree
+        char* right = calloc(((strlen(query)/2)+1),sizeof(char));
+        strcpy(right, query+loc_conn+2);
         
         t_set_left(t, build_tree(left));
         t_set_right(t, build_tree(right));
         
-  
         
-    free(left);
-    free(right);
+        
+        free(left);
+        free(right);
     }
     return t;
 }
@@ -188,17 +188,17 @@ char* str_at(char* p, int n){
         if(p[i] != ' '){
             in = 1;
         }
- 
+        
         if(p[i] == ' ' && in == 1){
             end = i;
             break;
         }
-         end = (i+1);
+        end = (i+1);
         if(p[i] == '\0') {
             
             break;
         }
-       
+        
     }
     char* ret = malloc(sizeof(char)*(end-n+1));
     strncpy(ret, p+n, end-n);
@@ -235,34 +235,34 @@ int grammar_checker(char* text){
         }
         else if (text[i] == ' ' && (in == 1 || in2 == 1 || con > 0))
             return 0;
-
+        
         if (text[i] == '&' && in == 1 && in2 == 1 && con >  0){
             in = 0;
             in2 = 0;
             con = 0;
             cc = 0;
-                    }
+        }
         
         if (text[i] == '|' && in == 1 && in2 == 1 && con > 0){
             in = 0;
             in2 = 0;
             con = 0;
             cc = 0;
-           
+            
         }
-       
+        
         if((text[i] == '&' && text[i+1] == '&') || (text[i] == '|' && text[i+1] == '|')) cc++;
         if((text[i] == '&' && text[i+1] != '&') || (text[i] == '|' && text[i+1] != '|')){
             cc++;
             if(cc == 2) continue;
-                return 0;
-            }
+            return 0;
+        }
         
         
         
         
     }
- 
+    
     return 1;
 }
 
@@ -271,11 +271,11 @@ int find_conditional(char* text){
         if(text[i]  == '=') return i+1;
     }
     return -1;
-
+    
 }
 
 void testing(){
     for(int i = 0; i < cc; i++){
-     printf("%s\n", columns[i]);
+        printf("%s\n", columns[i]);
     }
 }

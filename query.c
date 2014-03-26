@@ -17,9 +17,10 @@ int find_conn();
 int grammar_checker();
 int find_conditional();
 Tree* build_tree();
-char* str_at();
+void str_at();
 char **columns;
 char* types;
+char* query_trimmed;
 int cc;
 
 
@@ -45,8 +46,10 @@ void q_free(Tree *query){
     if(t_right(query) != NULL)
         q_free(t_right(query));
     
-    if(query != NULL)
+    if(query != NULL){
+        
         free(query);
+    }
 }
 
 
@@ -163,8 +166,8 @@ Tree* build_tree(char* query){
     Tree* t = t_make();
     
     if(conc == 0) {
-        char* hold = str_at(query, 0);
-        t_set_data(t, hold);
+        str_at(query, 0);
+        t_set_data(t, query_trimmed);
 
     }
     if(query[loc_conn] == '&'){
@@ -195,7 +198,7 @@ Tree* build_tree(char* query){
     return t;
 }
 
-char* str_at(char* p, int n){
+void str_at(char* p, int n){
     int end = 0, in = 0;
     for(int i = n; i < strlen(p); i++){
         if(in == 0 && p[i] != ' ') n = i;
@@ -217,7 +220,8 @@ char* str_at(char* p, int n){
     char* ret = malloc(sizeof(char)*(end-n+1));
     strncpy(ret, p+n, end-n);
     ret[end-n] = '\0';
-    return ret;
+    query_trimmed = ret;
+    //return ret;
 }
 
 int grammar_checker(char* text){

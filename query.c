@@ -110,8 +110,8 @@ void print_data(void* v){
         printf("%.2f\n", rd_parse_number(v, n, strlen(v), err));
     }
     else if (*err == 1){
-        if (strcmp(v, "&&") == 0) printf("AND\n");
-        else if(strcmp(v, "||") == 0) printf("OR\n");
+        if (*((int*)v) == 1) printf("AND\n");
+        else if(*((int*)v) == 0) printf("OR\n");
         else printf("%s\n",  (char *)v);
     }
     free(err);
@@ -172,10 +172,14 @@ Tree* build_tree(char* query){
 
     }
     if(query[loc_conn] == '&'){
-        t_set_data(t, "&&");
+        int* p = malloc(sizeof(int));
+        *p = 1;
+        t_set_data(t, p);
     }
     if(query[loc_conn] == '|'){
-        t_set_data(t, "||");
+        int* o = malloc(sizeof(int));
+        *o = 0;
+        t_set_data(t, o);
     }
     if(conc != 0){
         

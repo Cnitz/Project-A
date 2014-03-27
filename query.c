@@ -40,6 +40,11 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
 
 //TODO: make this work
 void q_free(Tree *query){
+    static int check = 0;
+    if(check == 0){
+        free(columns);
+        check++;
+    }
 
     if(t_left(query) != NULL)
         q_free(t_left(query));
@@ -105,7 +110,7 @@ void print_data(void* v){
         
     rd_parse_number(v, n, strlen(v), err);
     if(*err == 0){
-        char* p = malloc(sizeof(char)*n);
+        char* p = malloc(sizeof(char)*n+1);
         strncpy(p, v, n);
         p[n] = '\0';
         printf("%s", p);
@@ -232,10 +237,89 @@ char* str_at(char* p, int n){
 }
 
 int grammar_checker(char* text){
+    if(text == NULL) return 0;
+    if(strlen(text) < 3) return 0;
+    if(find_conditional(text) == -1) return 0;
     int in = 0, con = 0, in2 = 0, cc = 0;
+    if(text[0] == '&' || text[0] == '|' || text[0] == '>' ||
+       text[0] == '<' || text[0] == '=' ) return 0;
+    
+    for(int i = 0; i < strlen(text)+1; i++){
+        //bad cases
+        if((text[i] == '<' || text[i] == '>' || text[i] == '=') && in == 0) return 0;
+        if(((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z')) || ((text[i] >= '0' && text[i] <= '9')))
+                if(in == 1 && con > 0)
+                    in2 = 1;
+        //check column name
+        if((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z'))
+            if(in == 0 && con == 0 && in2 == 0)
+                in = 1;
+        
+        //check <<, >>, <>, ><, <&, <|, >&, >|
+        if((text[i] == '<' || text[i] == '>') && (text[i+1] == '<' || text[i+1] == '>' || text[i+1] == '&' || text[i+1] == '|')) return 0;
+        //checks for ==, =>, =<, =&, =|
+        if(text[i] == '=' && (text[i+1] == '=' || text[i+1] == '<' || text[i+1] == '>' || text[i+1] == '&' || text[i+1] == '|')) return 0;
+        //check for valid connectives
+        if(text[i] == '=' || text[i] == '<' || text[i] == '>') con++;
+        if(con > 2) return 0;
+        //************* uhh rewrite this
+  /*      if(text[i] != ' ' && text[i] != '|' && text[i] != '&' && text[i] == '<'
+           && text[i] == '>' && text[i] == '='){
+            if(con > 0 && in == 1)
+                in2 = 1;
+        }*/
+        //check for valid connectives
+        if((text[i] == '&' && text[i+1] == '&') || (text[i] == '|' && text[i+1] == '|')) cc++;
+        if((text[i] == '&' && text[i+1] != '&') || (text[i] == '|' && text[i+1] != '|')){
+            cc++;
+            if(cc == 2) continue;
+            return 0;
+        }
+        
+        if((text[i] == ' ' || text[i] == '\0') && in == 1 && con > 0 && in2 == 1){
+            in = 0;
+            con = 0;
+            in2 = 0;
+            cc = 0;
+            continue;
+        }
+        else if ((text[i] == '\0' || text[i] == ' ') && (in == 1 || in2 == 1 || con > 0))
+            return 0;
+        
+        
+        if (text[i] == '&' && in == 1 && in2 == 1 && con >  0){
+            in = 0;
+            in2 = 0;
+            con = 0;
+        }
+        
+        if (text[i] == '|' && in == 1 && in2 == 1 && con > 0){
+            in = 0;
+            in2 = 0;
+            con = 0;
+            
+        }
+        
+        
+        
+           }
+    
+    return 1;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     //checks conditional statements.
-    for(int i = 0; i < strlen(text); i++){
-        if(text[i] == ' ') {}
+   /* for(int i = 0; i < strlen(text); i++){
+       // if(text[i] == ' ') {}
         if((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z'))
             if(con == 0)
                 in = 1;
@@ -249,16 +333,16 @@ int grammar_checker(char* text){
         }
         if(in == 1 && con > 0)
             if ((text[i] != ' ' && text[i] != '&') && (text[i] != '|' && text[i] != '=')
-                && (text[i] != '>' && text[i] != '<'))
+                && (text[i] != '>' && text[i] != '<') && text[i] != '\0')
                 in2 = 1;
-        if (text[i] == ' ' && in == 1 && in2 == 1 && con > 0){
+        if ((text[i] == '\0' || text[i] == ' ') && in == 1 && in2 == 1 && con > 0){
             in = 0;
             in2 = 0;
             con = 0;
             cc = 0;
             continue;
         }
-        else if (text[i] == ' ' && (in == 1 || in2 == 1 || con > 0))
+        else if ((text[i] == '\0' || text[i] == ' ') && (in == 1 || in2 == 1 || con > 0))
             return 0;
         
         if (text[i] == '&' && in == 1 && in2 == 1 && con >  0){
@@ -288,7 +372,7 @@ int grammar_checker(char* text){
         
     }
     
-    return 1;
+    return 1;*/
 }
 //returns index after conditional
 int find_conditional(char* text){

@@ -24,7 +24,7 @@ int cc;
 
 
 Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
-    if(grammar_checker(query_text) == 0) {printf("here\n");
+    if(grammar_checker(query_text) == 0) {
         return NULL;}
     
    

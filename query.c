@@ -90,7 +90,7 @@ int q_get_col_index(void *query_data){
 
 
 double q_get_double(void *query_data){
-    int* err = malloc(sizeof(int));
+    int* err = calloc(1, sizeof(int));
     double r = rd_parse_number((char*)query_data, find_conditional(query_data), strlen(query_data), err);
     free(err);
     return r;
@@ -181,12 +181,12 @@ Tree* build_tree(char* query){
 
     }
     if(query[loc_conn] == '&'){
-        int* p = malloc(sizeof(int));
+        int* p = calloc(1, sizeof(int));
         *p = 1;
         t_set_data(t, p);
     }
     if(query[loc_conn] == '|'){
-        int* o = malloc(sizeof(int));
+        int* o = calloc(1, sizeof(int));
         *o = 0;
         t_set_data(t, o);
     }
@@ -231,7 +231,7 @@ char* str_at(char* p, int n){
         }
         
     }
-    char* ret = malloc(sizeof(char)*(end-n+1));
+    char* ret = calloc((end-n+1), sizeof(char));
     strncpy(ret, p+n, end-n);
     ret[end-n] = '\0';
     return ret;

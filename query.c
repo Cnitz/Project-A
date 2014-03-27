@@ -63,13 +63,13 @@ void q_print(Tree *data){
 //TODO: FIX
 int q_get_type(void *query_data){
     
-    if(strcmp("||", query_data) == 0) return 0;
-    else if (strcmp("&&", query_data) == 0) return 1;
-    else if (strcmp("=", query_data) == 0) return 2;
-    else if (strcmp("<", query_data) == 0) return 3;
-    else if (strcmp(">", query_data) == 0) return 4;
-    else if (strcmp("<=", query_data) == 0) return 5;
-    else if (strcmp(">=", query_data) == 0) return 6;
+    if(*((int*)query_data) == 0) return 0;
+     else if (*((int*)query_data) == 1) return 1;
+     else if (strstr(query_data, "=") == 0) return 2;
+     else if (strstr(query_data, "<") == 0) return 3;
+     else if (strstr(query_data, ">") == 0) return 4;
+     else if (strstr(query_data, "<=") == 0) return 5;
+     else if (strstr(query_data, ">=") == 0) return 6;
     else return -1;
 }
 
@@ -106,8 +106,11 @@ void print_data(void* v){
     rd_parse_number(v, n, strlen(v), err);
     if(*err == 0){
         char* p = malloc(sizeof(char)*n);
-        printf("%s", strncpy(p, v, n));
+        strncpy(p, v, n);
+        p[n] = '\0';
+        printf("%s", p);
         printf("%.2f\n", rd_parse_number(v, n, strlen(v), err));
+        free(p);
     }
     else if (*err == 1){
         if (*((int*)v) == 1) printf("AND\n");

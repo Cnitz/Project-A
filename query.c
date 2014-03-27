@@ -27,7 +27,7 @@ Tree *q_parse(char *query_text, char **column_names, char *column_types,  int nu
     if(grammar_checker(query_text) == 0) {printf("here\n");
         return NULL;}
     
-    columns = malloc(sizeof(char*)*num_columns);
+   
     columns = column_names;
     cc = num_columns;
     types = column_types;
@@ -70,11 +70,12 @@ int q_get_type(void *query_data){
     
     if(*((int*)query_data) == 0) return 0;
      else if (*((int*)query_data) == 1) return 1;
-     else if (strstr(query_data, "=") == 0) return 2;
-     else if (strstr(query_data, "<") == 0) return 3;
-     else if (strstr(query_data, ">") == 0) return 4;
      else if (strstr(query_data, "<=") == 0) return 5;
      else if (strstr(query_data, ">=") == 0) return 6;
+   
+     else if (strstr(query_data, "<") == 0) return 3;
+     else if (strstr(query_data, ">") == 0) return 4;
+  else if (strstr(query_data, "=") == 0) return 2;
     else return -1;
 }
 
@@ -105,17 +106,17 @@ void print_data(void* v){
     if(v == NULL) return;
     int* err = calloc(1, sizeof(int));
     int n = find_conditional((char*)v);
+    *err = 1;
     
-    //if(((char*)v)[n] > '0' && ((char*)v)[n] < '9')
-        
+        if(n> 0)
     rd_parse_number(v, n, strlen(v), err);
     if(*err == 0){
-        char* p = malloc(sizeof(char)*n+1);
+        char p[n+1];
         strncpy(p, v, n);
         p[n] = '\0';
         printf("%s", p);
         printf("%.2f\n", rd_parse_number(v, n, strlen(v), err));
-        free(p);
+        
     }
     else if (*err == 1){
         if (*((int*)v) == 1) printf("AND\n");

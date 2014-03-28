@@ -1,8 +1,8 @@
 //
-//  query.c
+// query.c
 //
 //
-//  Created by Christian Nitz on 3/19/14.
+// Created by Christian Nitz on 3/19/14.
 //
 //
 
@@ -25,11 +25,11 @@ char* types;
 int cc;
 
 
-Tree *q_parse(char *query_text, char **column_names, char *column_types,  int num_columns){
+Tree *q_parse(char *query_text, char **column_names, char *column_types, int num_columns){
     if(grammar_checker(query_text) == 0) {
         return NULL;}
     
-    columns = calloc(num_columns, sizeof(char*));
+    
     columns = column_names;
     cc = num_columns;
     types = column_types;
@@ -64,8 +64,10 @@ void q_print(Tree *data){
 
 //TODO: FIX
 int q_get_type(void *query_data){
+    
     if(query_data == NULL) return -1;
-    //printf("%d", *((int*)query_data));
+    
+    // printf("%d", *((int*)query_data));
     if(*((int*)query_data) == 0) return 0;
     else if (*((int*)query_data) == 1) return 1;
     else if (strstr(query_data, "<=") != NULL) return 5;
@@ -74,14 +76,18 @@ int q_get_type(void *query_data){
     else if (strstr(query_data, ">") != NULL) return 4;
     else if (strstr(query_data, "=") != NULL) return 2;
     else return -1;
-   
+    
 }
 
 
 int q_get_col_index(void *query_data){
+	char* name = column_name(query_data);
     for(int i = 0; i < cc; i++){
-        if(strcmp(column_name(query_data), columns[i]) == 0)
+        
+        if(strcmp(name, columns[i]) == 0){
+            free(name);
             return i;
+        }
     }
     return -1;
 }
@@ -96,7 +102,8 @@ double q_get_double(void *query_data){
 
 
 char *q_get_str(void *query_data){
-    return rd_parse_string((char*)query_data, find_conditional(query_data), strlen(query_data));
+	char* p = rd_parse_string((char*)query_data, find_conditional(query_data), strlen(query_data));
+    return p;
 }
 
 //TODO: MAKE DOUBLES PRINT "%.2f"
@@ -104,19 +111,22 @@ void print_data(void* v){
     if(v == NULL) return;
     int* err = calloc(1, sizeof(int));
     int n = find_conditional((char*)v);
-    
+    *err =1;
     //if(((char*)v)[n] > '0' && ((char*)v)[n] < '9')
-    
-    rd_parse_number(v, n, strlen(v), err);
+    if(n>0)
+        rd_parse_number(v, n, strlen(v), err);
     if(*err == 0){
-        char* p = calloc(n, sizeof(char));
-        printf("%s", strncpy(p, v, n));
+        char* p = calloc(n+1, sizeof(char));
+        strncpy(p, v, n);
+        p[n] = '\0';
+        printf("%s", p);
         printf("%.2f\n", rd_parse_number(v, n, strlen(v), err));
+        free(p);
     }
     else if (*err == 1){
         if (*((int*)v) == 1) printf("AND\n");
         else if(*((int*)v) == 0) printf("OR\n");
-        else printf("%s\n",  (char *)v);
+        else printf("%s\n", (char *)v);
     }
     free(err);
 }
@@ -193,7 +203,7 @@ Tree* build_tree(char* query){
         left[loc_conn] = '\0';
         
         
-        char* right = calloc(((strlen(query)/2)+1),sizeof(char));
+        char* right = calloc(strlen(query)-loc_conn,sizeof(char));
         strcpy(right, query+loc_conn+2);
         
         t_set_left(t, build_tree(left));
@@ -236,11 +246,12 @@ int grammar_checker(char* text){
     if(text == NULL) return 0;
     if(strlen(text) < 3) return 0;
     if(find_conditional(text) == -1) return 0;
-    int in = 0, con = 0, in2 = 0, cc = 0, waiter = 0;
+    int in = 0, con = 0, in2 = 0, cc = 0, waiter = 0, conn_find = 0;
     if(text[0] == '&' || text[0] == '|' || text[0] == '>' ||
        text[0] == '<' || text[0] == '=' ) return 0;
     
     for(int i = 0; i < strlen(text)+1; i++){
+        
         //bad cases
         if((text[i] == '<' || text[i] == '>' || text[i] == '=') && in == 0) return 0;
         if(((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z')) || ((text[i] >= '0' && text[i] <= '9')))
@@ -248,8 +259,10 @@ int grammar_checker(char* text){
                 in2 = 1;
         //check column name
         if((text[i] >= 'a' && text[i] <= 'z') || (text[i] >= 'A' && text[i] <= 'Z')){
-            if(in == 0 && con == 0 && in2 == 0)
+            if(in == 0 && con == 0 && in2 == 0){
                 in = 1;
+                cc = 0;
+            }
             if(waiter == 1) return 0;
         }
         
@@ -261,17 +274,22 @@ int grammar_checker(char* text){
         if(text[i] == '=' || text[i] == '<' || text[i] == '>') con++;
         if(con > 2) return 0;
         //************* uhh rewrite this
-        /*      if(text[i] != ' ' && text[i] != '|' && text[i] != '&' && text[i] == '<'
+        /* if(text[i] != ' ' && text[i] != '|' && text[i] != '&' && text[i] == '<'
          && text[i] == '>' && text[i] == '='){
          if(con > 0 && in == 1)
          in2 = 1;
          }*/
         //check for valid connectives
-        if((text[i] == '&' && text[i+1] == '&') || (text[i] == '|' && text[i+1] == '|')) cc++;
+        if((text[i] == '&' && text[i+1] == '&') || (text[i] == '|' && text[i+1] == '|')) {cc++;
+            
+            conn_find = 1;
+        }
         if((text[i] == '&' && text[i+1] != '&') || (text[i] == '|' && text[i+1] != '|')){
             waiter = 0;
             cc++;
+            
             if(cc == 2) continue;
+            
             return 0;
         }
         
@@ -281,13 +299,14 @@ int grammar_checker(char* text){
             in2 = 0;
             cc = 0;
             waiter = 1;
+            conn_find = 0;
             continue;
         }
-        else if ((text[i] == '\0' || text[i] == ' ') && (in == 1 || in2 == 1 || con > 0))
+        else if ((text[i] == '\0' || text[i] == ' ') && (in == 1 || in2 == 1 || con > 0)){
             return 0;
+        }
         
-        
-        if (text[i] == '&' && in == 1 && in2 == 1 && con >  0){
+        if (text[i] == '&' && in == 1 && in2 == 1 && con > 0){
             in = 0;
             in2 = 0;
             con = 0;
@@ -302,7 +321,9 @@ int grammar_checker(char* text){
             
         }
         
-        
+        if(text[i] == '\0' && conn_find == 1) {return 0;
+            
+        }
         
     }
     
